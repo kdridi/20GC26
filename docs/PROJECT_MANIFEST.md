@@ -232,6 +232,103 @@ Un jeu n’est “terminé” que lorsque :
 
 ---
 
+# Approche Incrémentale - Architecture Émergente
+
+## Philosophie
+
+**Need-driven, pas speculation-driven.**
+
+L'architecture émerge des besoins réels révélés par les tests et l'implémentation.
+Pas de big design up front. Pas de fichiers "au cas où".
+
+## Principe Fondamental
+
+```
+Test FIRST → Code MINIMAL → Refactor WHEN NEEDED
+```
+
+- **Créer fichiers/classes** uniquement quand la duplication devient évidente
+- **Extraire patterns** quand ils apparaissent naturellement 3 fois
+- **Abstractions** émergent des cas concrets, pas de spéculations
+
+## Règle des 3 (Rule of Three)
+
+```cpp
+// 1 fois : OK, code inline
+void updatePlayer() { player.pos += player.vel * dt; }
+
+// 2 fois : Tolérable, on observe
+void updateEnemy() { enemy.pos += enemy.vel * dt; }
+
+// 3 fois : EXTRAIRE !
+template<PhysicsObject T>
+void updatePhysics(T& obj, float dt) {
+    obj.pos += obj.vel * dt;
+}
+```
+
+## Workflow Incrémental par Jeu
+
+### Exemple : Pong
+
+```
+1. SPECS : Documenter les règles (GAME_SPEC.md, CAPACITY.md)
+2. TEST  : Ball se déplace → Ball.hpp minimal
+3. TEST  : Ball rebondit sur bords → Physics.hpp émerge
+4. TEST  : Paddle bouge avec input → InputSystem.hpp émerge
+5. TEST  : Collision ball/paddle → CollisionSystem.hpp émerge
+6. TEST  : Score augmente → GameState.hpp émerge
+7. REFACTOR : Patterns communs deviennent clairs
+```
+
+À chaque étape : **un seul objectif, un test, le code minimal**.
+
+## Création de Fichiers : Checklist
+
+Avant de créer un nouveau fichier, valider :
+
+- [ ] Est-ce que le code actuel fonctionne ?
+- [ ] Y a-t-il duplication (3+ fois) ?
+- [ ] La responsabilité est-elle clairement identifiée ?
+- [ ] Un test montre le besoin de cette séparation ?
+
+**Si non à une question → NE PAS CRÉER le fichier.**
+
+## Anti-Patterns à Éviter
+
+❌ Créer toute l'arborescence à l'avance
+❌ "On va sûrement en avoir besoin"
+❌ Abstractions prématurées
+❌ Classes avec une seule méthode sans justification
+❌ Interfaces "pour l'extensibilité future"
+
+✅ Un test qui échoue
+✅ Le code minimal qui le fait passer
+✅ Refactor quand la duplication est évidente
+✅ Architecture qui émerge naturellement
+
+## Compromis Pragmatiques
+
+**Exception** : Certains fichiers peuvent être créés à l'avance si :
+
+1. **Build système** : Makefile, .clang-format, etc.
+2. **Documentation obligatoire** : GAME_SPEC.md, CAPACITY.md (avant coding)
+3. **Shared abstractions** : Si déjà utilisées dans un jeu précédent
+
+Mais **jamais** de code source spéculatif.
+
+## Collaboration avec TDD_GUARDIAN
+
+Cette approche renforce le TDD :
+
+- Chaque fichier naît d'un test
+- Chaque classe a une raison testable d'exister
+- Le refactoring est guidé par les tests verts
+
+**TDD_GUARDIAN approuve cette méthode ! ✓**
+
+---
+
 # Rappel Important
 
 ⚠️ **Après CHAQUE "compacting conversation"**, rappeler à Claude :
@@ -240,3 +337,4 @@ Un jeu n’est “terminé” que lorsque :
 - Code et commentaires en **ANGLAIS**
 - Relire ce **PROJECT_MANIFEST.md**
 - Appliquer TDD strict
+- **Suivre l'approche incrémentale** : pas de code spéculatif
