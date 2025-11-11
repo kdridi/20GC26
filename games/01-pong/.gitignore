@@ -8,6 +8,12 @@ build/
 # Debug symbols
 *.dSYM/
 
+# Coverage
+coverage/
+*.gcda
+*.gcno
+*.gcov
+
 # Editor
 .vscode/
 .idea/

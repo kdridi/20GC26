@@ -6,9 +6,12 @@ Premier jeu du 20 Games Challenge. Implémentation minimaliste de Pong en C++26 
 
 - **Compilateur** : Clang++ ou G++ avec support C++26 (`-std=c++2c`)
 - **Google Test** : Framework de tests
-  ```bash
-  brew install googletest  # macOS
-  ```
+- **lcov** : Coverage reports
+- **Google Benchmark** : Performance benchmarks
+
+```bash
+brew install googletest lcov google-benchmark  # macOS
+```
 
 ## Build & Run
 
@@ -22,6 +25,13 @@ make run
 # Tests
 make test
 
+# Coverage (génère rapport HTML)
+make coverage
+# Ouvrir: coverage/index.html
+
+# Benchmarks (performance)
+make bench
+
 # Build release (optimisé)
 make release
 
@@ -33,12 +43,15 @@ make clean
 
 ```
 01-pong/
-├── Makefile              # Build system
+├── Makefile              # Build system (DRY, coverage, bench)
 ├── pong/
 │   └── main.cpp          # Code source
 ├── tests/
 │   └── basic_test.cpp    # Tests GTest
-└── build/                # Binaires (ignoré par git)
+├── benchmarks/
+│   └── basic_bench.cpp   # Performance benchmarks
+├── build/                # Binaires (ignoré par git)
+└── coverage/             # Rapports coverage (ignoré par git)
 ```
 
 ## Développement
@@ -50,14 +63,19 @@ make clean
 3. Refactorer si nécessaire
 4. Commit atomique
 
-### Flags de Compilation
+### Flags de Compilation (DRY)
+
+**Base** (tous les builds) :
+- `-std=c++2c -Wall -Wextra -Wpedantic -Werror`
 
 **Debug** (défaut) :
-- `-std=c++2c -Wall -Wextra -Wpedantic -Werror`
-- `-g -fsanitize=address,undefined`
+- Base + `-g -fsanitize=address,undefined`
 
 **Release** :
-- `-std=c++2c -O3 -DNDEBUG`
+- Base + `-O3 -DNDEBUG`
+
+**Coverage** :
+- Base + `-fprofile-arcs -ftest-coverage`
 
 ## Statut
 
