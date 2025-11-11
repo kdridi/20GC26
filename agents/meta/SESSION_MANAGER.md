@@ -803,13 +803,113 @@ session:
     include_git_status: true
 ```
 
+## Discipline des Commits
+
+### Règle d'Or : UN LIVRABLE = UN COMMIT
+
+```
+Livrable terminé → git add → git commit → IMMÉDIATEMENT
+```
+
+**Jamais** accumuler plusieurs livrables avant de committer.
+
+### Qu'est-ce qu'un Livrable ?
+
+Un livrable est une unité de travail **auto-suffisante et explicable** :
+
+- ✅ Test qui passe (red → green)
+- ✅ Refactoring terminé
+- ✅ Documentation complétée (.md)
+- ✅ Feature fonctionnelle minimale
+- ✅ Fix de bug vérifié par test
+
+**Contre-exemples** (pas encore des livrables) :
+- ❌ Test écrit mais qui échoue encore
+- ❌ Code à moitié refactoré
+- ❌ WIP, TODO, FIXME non résolus
+- ❌ Tests cassés
+
+### Format des Messages (FRANÇAIS)
+
+```
+<type>: <description courte>
+
+<corps détaillé si nécessaire>
+- Point 1
+- Point 2
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+**Types** :
+- `feat`: Nouvelle fonctionnalité
+- `fix`: Correction de bug
+- `refactor`: Refactoring sans changement fonctionnel
+- `test`: Ajout/modification de tests
+- `docs`: Documentation uniquement
+- `chore`: Build, config, dépendances
+- `perf`: Optimisation de performance
+
+### Workflow Type
+
+```cpp
+// Cycle TDD
+1. Write test          → (pas de commit, test rouge)
+2. Implement code      → (pas de commit, WIP)
+3. Test passes (green) → ✅ COMMIT "feat: implement X"
+
+// Documentation
+1. Créer SPEC.md       → ✅ COMMIT "docs: add game spec"
+2. Créer CAPACITY.md   → ✅ COMMIT "docs: define memory budget"
+
+// Refactoring
+1. Extract class       → ✅ COMMIT "refactor: extract Physics system"
+2. Rename variables    → ✅ COMMIT "refactor: clarify naming in Ball"
+```
+
+### Anti-Patterns
+
+❌ **"Commit de fin de journée"** avec 10 fichiers
+❌ **"WIP"** sans description
+❌ **"Fix"** sans détails
+❌ **Commits géants** (> 300 lignes)
+❌ **Commits cassés** (ne compile pas)
+
+✅ **Commits atomiques** (1 responsabilité)
+✅ **Commits propres** (tout passe)
+✅ **Commits explicables** en 1 phrase
+
+### Validation Pré-Commit
+
+Avant CHAQUE commit, valider :
+
+- [ ] Le code compile
+- [ ] Tous les tests passent
+- [ ] Pas de warnings critiques
+- [ ] Message de commit clair et en français
+- [ ] Livrable auto-suffisant (pas de WIP)
+
+Si **un seul ❌** → NE PAS COMMITTER, finir le travail d'abord.
+
+### Responsabilité du SESSION_MANAGER
+
+Je m'engage à :
+
+1. **Rappeler** : "Ce livrable est terminé, commitons maintenant !"
+2. **Bloquer** : Refuser d'avancer si livrable non committé
+3. **Valider** : Vérifier que le commit est atomique et propre
+4. **Tracer** : Documenter chaque commit dans les notes de session
+
 ## Red Flags 🚩
 
 - Session > 3h sans pause
 - Pas de tests depuis 30min
 - Context switch > 5 fois
 - Objectifs non définis
-- Pas de commits depuis 1h
+- **Pas de commits depuis 1h** ⚠️ CRITIQUE
+- **Livrable non committé** ⚠️ CRITIQUE
 - Multi-tasking excessif
 - Scope creep détecté
 - Fatigue détectée (erreurs++)

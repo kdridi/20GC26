@@ -1,0 +1,24 @@
+# Build artifacts
+build/
+*.o
+*.a
+*.so
+*.dylib
+
+# Debug symbols
+*.dSYM/
+
+# Coverage
+coverage/
+*.gcda
+*.gcno
+*.gcov
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS
+.DS_Store
