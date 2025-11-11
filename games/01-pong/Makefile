@@ -2,6 +2,7 @@
 # Build system with coverage and benchmarking support
 
 CXX := clang++
+CLANG_TIDY := /opt/homebrew/opt/llvm/bin/clang-tidy
 
 # Base flags (DRY - used by all targets)
 BASE_CXXFLAGS := -std=c++2c -Wall -Wextra -Wpedantic -Werror -I/opt/homebrew/include
@@ -38,7 +39,7 @@ TEST_COV_EXE := $(BUILD_DIR)/test_coverage
 CXXFLAGS := $(BASE_CXXFLAGS) $(DEBUG_FLAGS)
 LDFLAGS := $(BASE_LDFLAGS) $(DEBUG_FLAGS)
 
-.PHONY: all clean test run coverage bench release help
+.PHONY: all clean test run coverage bench release help format format-check lint check-all
 
 all: $(PONG_EXE)
 
@@ -95,6 +96,44 @@ bench: $(BUILD_DIR)
 	@echo "Running benchmarks..."
 	@$(BENCH_EXE)
 
+# Code quality targets
+format:
+	@echo "Formatting code..."
+	@find $(SRC_DIR) $(TEST_DIR) $(BENCH_DIR) -name "*.cpp" -o -name "*.hpp" 2>/dev/null | \
+		xargs clang-format -i || true
+	@echo "✅ Code formatted"
+
+format-check:
+	@echo "Checking code format..."
+	@FAILED=0; \
+	for file in $$(find $(SRC_DIR) $(TEST_DIR) $(BENCH_DIR) -name "*.cpp" -o -name "*.hpp" 2>/dev/null); do \
+		if ! clang-format --dry-run --Werror "$$file" >/dev/null 2>&1; then \
+			echo "❌ Format check failed: $$file"; \
+			clang-format --dry-run "$$file" | head -20; \
+			FAILED=1; \
+		fi; \
+	done; \
+	if [ $$FAILED -eq 1 ]; then \
+		echo "Run 'make format' to fix formatting issues."; \
+		exit 1; \
+	fi
+	@echo "✅ Format check passed"
+
+lint:
+	@echo "Running clang-tidy..."
+	@$(CLANG_TIDY) $(SRC_DIR)/*.cpp $(TEST_DIR)/*.cpp -- $(BASE_CXXFLAGS) || \
+		(echo "❌ Linting failed" && exit 1)
+	@echo "Running cppcheck..."
+	@cppcheck --enable=warning,style,performance,portability \
+		--suppress=missingIncludeSystem --suppress=unusedFunction \
+		--inline-suppr --quiet --error-exitcode=1 \
+		$(SRC_DIR) $(TEST_DIR) 2>&1 || \
+		(echo "❌ cppcheck failed" && exit 1)
+	@echo "✅ Lint passed"
+
+check-all: format-check lint test
+	@echo "✅ All checks passed!"
+
 clean:
 	rm -rf $(BUILD_DIR) $(COVERAGE_DIR)
 	find . -name "*.gcda" -o -name "*.gcno" | xargs rm -f 2>/dev/null || true
@@ -102,12 +141,19 @@ clean:
 help:
 	@echo "Pong Makefile"
 	@echo ""
-	@echo "Targets:"
-	@echo "  all      - Build Pong (default, debug)"
-	@echo "  test     - Build and run tests"
-	@echo "  coverage - Run tests with coverage report (HTML)"
-	@echo "  bench    - Run performance benchmarks"
-	@echo "  run      - Run Pong"
-	@echo "  release  - Build optimized release"
-	@echo "  clean    - Remove build artifacts"
-	@echo "  help     - Show this message"
+	@echo "Build Targets:"
+	@echo "  all         - Build Pong (default, debug)"
+	@echo "  test        - Build and run tests"
+	@echo "  coverage    - Run tests with coverage report (HTML)"
+	@echo "  bench       - Run performance benchmarks"
+	@echo "  run         - Run Pong"
+	@echo "  release     - Build optimized release"
+	@echo "  clean       - Remove build artifacts"
+	@echo ""
+	@echo "Quality Targets:"
+	@echo "  format      - Format code with clang-format"
+	@echo "  format-check- Check code format (fails if not formatted)"
+	@echo "  lint        - Run clang-tidy + cppcheck"
+	@echo "  check-all   - Run all checks (format + lint + test)"
+	@echo ""
+	@echo "  help        - Show this message"

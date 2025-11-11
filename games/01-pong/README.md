@@ -8,9 +8,12 @@ Premier jeu du 20 Games Challenge. Implémentation minimaliste de Pong en C++26 
 - **Google Test** : Framework de tests
 - **lcov** : Coverage reports
 - **Google Benchmark** : Performance benchmarks
+- **clang-format** : Formatage automatique
+- **clang-tidy** : Analyse statique (LLVM)
+- **cppcheck** : Analyse statique complémentaire
 
 ```bash
-brew install googletest lcov google-benchmark  # macOS
+brew install googletest lcov google-benchmark llvm cppcheck  # macOS
 ```
 
 ## Build & Run
@@ -77,10 +80,47 @@ make clean
 **Coverage** :
 - Base + `-fprofile-arcs -ftest-coverage`
 
+## Qualité du Code
+
+### Targets Make
+
+```bash
+# Formater le code automatiquement
+make format
+
+# Vérifier le formatage (fail si non conforme)
+make format-check
+
+# Analyse statique (clang-tidy + cppcheck)
+make lint
+
+# Tout vérifier (format + lint + test)
+make check-all
+```
+
+### Configuration
+
+- **`.clang-format`** : Style custom minimal (indent 4, 100 cols, `int *ptr`)
+- **`.clang-tidy`** : Checks stricts (bugprone, modernize, performance, readability)
+- **`.pre-commit-hook.sh`** : Hook git (format-check + lint + test)
+
+### Installer le Pre-commit Hook
+
+```bash
+./install-hooks.sh
+```
+
+Le hook vérifiera automatiquement la qualité avant chaque commit. Pour bypasser (non recommandé) :
+
+```bash
+git commit --no-verify
+```
+
 ## Statut
 
 - [x] Setup build system
 - [x] Premier test qui passe
+- [x] Outils de qualité (format, lint, hooks)
 - [ ] Version 0.1 : Balle libre
 - [ ] Version 0.2 : Une raquette
 - [ ] Version 0.3 : Pong complet
