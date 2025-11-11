@@ -1,0 +1,18 @@
+# Build artifacts
+build/
+*.o
+*.a
+*.so
+*.dylib
+
+# Debug symbols
+*.dSYM/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS
+.DS_Store
