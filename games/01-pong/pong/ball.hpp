@@ -24,6 +24,21 @@ struct Ball {
         y += vy * dt;
     }
 
+    // Bounce on walls - Handles collision with top and bottom walls
+    // Reflects vertical velocity and clamps position to boundaries
+    constexpr auto bounceOnWalls() noexcept -> void {
+        // Top wall (y=0)
+        if (y <= 0.0F) {
+            y = 0.0F;
+            vy = -vy;
+        }
+        // Bottom wall (y=SCREEN_HEIGHT)
+        if (y >= constants::SCREEN_HEIGHT) {
+            y = constants::SCREEN_HEIGHT;
+            vy = -vy;
+        }
+    }
+
     // Spaceship operator for comparisons (useful for tests)
     auto operator<=>(const Ball &) const = default;
 };
